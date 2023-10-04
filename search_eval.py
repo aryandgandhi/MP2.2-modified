@@ -11,7 +11,26 @@ def load_ranker(cfg_file):
     The parameter to this function, cfg_file, is the path to a
     configuration file used to load the index.
     """
-    return metapy.index.OkapiBM25(k1=1.2, b=0.75, k3=500)
+    best_ranker = None
+    best_ndcg = 0.0
+
+    # List of rankers to evaluate
+    rankers = [
+        (metapy.index.OkapiBM25, {'k1': [1.0, 1.2, 1.5], 'b': [0.5, 0.75, 1.0], 'k3': [0.0, 500.0, 1000.0]}),
+        (metapy.index.PivotedLength, {'s': [0.1, 0.2, 0.3]}),
+        (metapy.index.DirichletPrior, {'mu': [1000.0, 2000.0, 5000.0]})
+    ]
+
+    for ranker_class, params in rankers:
+        for p in product(*params.values()):
+            param_dict = {k: v for k, v in zip(params.keys(), p)}
+            ranker = ranker_class(**param_dict)
+            curr_ndcg = evaluate_ranker(cfg_file, ranker)
+            if curr_ndcg > best_ndcg:
+                best_ndcg = curr_ndcg
+                best_ranker = ranker
+
+    return best_ranker
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
