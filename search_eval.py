@@ -45,7 +45,7 @@ def load_ranker(cfg_file):
         cfg_d = pytoml.load(fin)
     query_cfg = cfg_d['query-runner']
 
-    best_k1, best_b = tune_parameters(idx, query_cfg)
+    best_k1, best_b = tune_parameters(idx, query_cfg, cfg_file)
     return metapy.index.OkapiBM25(k1=best_k1, b=best_b, k3=500)
 
 if __name__ == '__main__':
