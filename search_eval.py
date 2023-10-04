@@ -5,8 +5,8 @@ import metapy
 import pytoml
 
 
-def compute_ndcg_for_params(idx, ranker, query_cfg, top_k):
-    ev = metapy.index.IREval(cfg)
+def compute_ndcg_for_params(idx, ranker, query_cfg, cfg_file, top_k):
+    ev = metapy.index.IREval(cfg_file)
     ndcg = 0.0
     num_queries = 0
     query_path = query_cfg.get('query-path', 'queries.txt')
@@ -22,13 +22,13 @@ def compute_ndcg_for_params(idx, ranker, query_cfg, top_k):
 
     return ndcg / num_queries
 
-def tune_parameters(idx, query_cfg):
+def tune_parameters(idx, query_cfg, cfg_file):
     best_ndcg = -1
     best_params = (1.2, 0.75)
     for k1 in [1.0, 1.2, 1.5, 1.8, 2.0]:
         for b in [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
             ranker = metapy.index.OkapiBM25(k1=k1, b=b, k3=500)
-            ndcg = compute_ndcg_for_params(idx, ranker, query_cfg, top_k=10)
+            ndcg = compute_ndcg_for_params(idx, ranker, query_cfg, cfg_file, top_k=10)
             if ndcg > best_ndcg:
                 best_ndcg = ndcg
                 best_params = (k1, b)
